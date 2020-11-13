@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="kyalo.innocent.offlinenotes.ui.home.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/actionCreateNote"
+            app:destination="@id/nav_create_note" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_create_note"
+        android:name="kyalo.innocent.offlinenotes.ui.add_note.AddNoteFragment"
+        android:label="Add Note"
+        tools:layout="@layout/fragment_add_note" >
+        <action
+            android:id="@+id/action_save_note"
+            app:destination="@id/nav_home" />
+        <argument
+            app:argType="kyalo.innocent.roomdb.db.Note"
+            android:name="MyNote"
+            android:defaultValue="@null"
+            app:nullable="true"/>
+    </fragment>
+</navigation>
