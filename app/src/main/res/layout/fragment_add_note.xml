@@ -44,13 +44,12 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:ems="10"
-            android:hint="Note"
+            android:hint="@string/note_hint_string"
             android:inputType="textPersonName"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/edt_note_title" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </layout>
 
 

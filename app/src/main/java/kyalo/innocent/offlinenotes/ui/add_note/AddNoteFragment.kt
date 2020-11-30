@@ -1,21 +1,18 @@
 package kyalo.innocent.offlinenotes.ui.add_note
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.*
+import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.Navigation
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.android.synthetic.main.fragment_add_note.*
 import kotlinx.coroutines.launch
-import kyalo.innocent.offlinenotes.utils.BaseFragment
 import kyalo.innocent.offlinenotes.R
 import kyalo.innocent.offlinenotes.databinding.FragmentAddNoteBinding
+import kyalo.innocent.offlinenotes.utils.BaseFragment
 import kyalo.innocent.offlinenotes.utils.success
-import kyalo.innocent.offlinenotes.ui.AddNoteFragmentArgs
-import kyalo.innocent.offlinenotes.ui.AddNoteFragmentDirections
 import kyalo.innocent.roomdb.db.Note
 import kyalo.innocent.roomdb.db.NotesDatabase
+
 
 class AddNoteFragment : BaseFragment() {
 
@@ -39,26 +36,25 @@ class AddNoteFragment : BaseFragment() {
         super.onActivityCreated(savedInstanceState)
 
         arguments.let {
-            localNote = AddNoteFragmentArgs.fromBundle(it!!).MyNote
-            edt_note_title.setText(localNote?.title)
-            edt_note_content.setText(localNote?.note)
+            localNote = AddNoteFragmentArgs.fromBundle(it!!).note
+            fAddNoteBinding.edtNoteTitle.setText(localNote?.title)
+            fAddNoteBinding.edtNoteContent.setText(localNote?.note)
         }
 
-        val fabAddNote : FloatingActionButton = fab_save_note
-        fabAddNote.setOnClickListener { view ->
+        fAddNoteBinding.fabSaveNote.setOnClickListener { view ->
 
-            val noteTitle = edt_note_title.text.toString().trim()
-            val noteContent = edt_note_content.text.toString().trim()
+            val noteTitle = fAddNoteBinding.edtNoteTitle.text.toString().trim()
+            val noteContent = fAddNoteBinding.edtNoteContent.text.toString().trim()
 
             if (noteTitle.isEmpty()) {
-                edt_note_title.error = "Note title is empty"
-                edt_note_title.requestFocus()
+                fAddNoteBinding.edtNoteTitle.error = "Note title is empty"
+                fAddNoteBinding.edtNoteTitle.requestFocus()
                 return@setOnClickListener
             }
 
             if (noteContent.isEmpty()) {
-                edt_note_content.error = "Note content is empty"
-                edt_note_content.requestFocus()
+                fAddNoteBinding.edtNoteContent.error = "Note content is empty"
+                fAddNoteBinding.edtNoteContent.requestFocus()
                 return@setOnClickListener
             }
 
@@ -106,10 +102,10 @@ class AddNoteFragment : BaseFragment() {
 
     private fun deleteNote() {
 
-        AlertDialog.Builder(context).apply {
+        AlertDialog.Builder(requireContext()).apply {
             setTitle("Are you sure?")
             setMessage("This note will be deleted permanently")
-            setPositiveButton("OK") {_,_ ->
+            setPositiveButton("OK") { _, _ ->
 
                 launch {
 

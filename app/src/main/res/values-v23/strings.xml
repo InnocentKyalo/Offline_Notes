@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete_string">Delete</string>
+    <string name="search_string">Search</string>
+    <string name="note_hint_string">Note</string>
 </resources>

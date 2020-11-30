@@ -25,3 +25,4 @@ fun setNotesToRecycler(recycler: RecyclerView, list: List<Note>?) {
         recycler.adapter = listAdapter
     }
 }
+

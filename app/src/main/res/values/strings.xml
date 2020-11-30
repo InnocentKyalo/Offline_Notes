@@ -14,4 +14,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="click_to_save_your_note">click to save your note</string>
     <string name="delete_string">Delete</string>
+    <string name="search_string">Search</string>
+    <string name="note_hint_string">Note</string>
 </resources>
