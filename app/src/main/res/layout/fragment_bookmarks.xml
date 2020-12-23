@@ -1,0 +1,28 @@
+<layout>
+
+    <data>
+
+        <import type="java.util.List" />
+
+        <import type="kyalo.innocent.roomdb.db.Note" />
+
+        <variable
+            name="listOfBookmarks"
+            type="List&lt;Note>" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.bookmarks.BookmarksFragment">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/bookmark_times_recycler"
+            bookmarksListBinding="@{listOfBookmarks}"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@layout/fragment_bookmarks" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

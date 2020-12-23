@@ -1,97 +1,86 @@
 package kyalo.innocent.offlinenotes.ui.home
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.widget.SearchView
+import androidx.core.view.MenuItemCompat
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import kotlinx.coroutines.launch
+import kyalo.innocent.offlinenotes.R
 import kyalo.innocent.offlinenotes.databinding.FragmentHomeBinding
-import kyalo.innocent.offlinenotes.utils.BaseFragment
 import kyalo.innocent.roomdb.db.Note
 import kyalo.innocent.roomdb.db.NotesDatabase
 
 
-class HomeFragment : BaseFragment() {
+class HomeFragment : Fragment() {
 
-    private lateinit var homeViewModel: HomeViewModel
-
-    private var fBinding: FragmentHomeBinding? = null
-
-    private var fNotesList: List<Note>? = null
+    private lateinit var fHomeViewModel: HomeViewModel
+    private lateinit var fBinding: FragmentHomeBinding
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
-        homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+        fHomeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+        fBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
 
-        fBinding = FragmentHomeBinding.inflate(inflater)
+        fHomeViewModel.notesList.observe(viewLifecycleOwner, { list ->
+            fBinding.notes = list
+        })
 
-        setUpNotesList()
-
-        fBinding!!.fabCreateNote.setOnClickListener {
-             val action = HomeFragmentDirections.actionCreateNote()
+        fBinding.fabCreateNote.setOnClickListener {
+            val action = HomeFragmentDirections.actionCreateNote()
             Navigation.findNavController(it).navigate(action)
         }
 
-        return fBinding!!.root
+        return fBinding.root
     }
 
-    private fun setUpNotesList() {
-        launch {
-            context?.let {
-                val localList: List<Note> = NotesDatabase(it).getDao().getAllNotes()
-                fBinding?.notes = localList
-                fNotesList = localList
-            }
-        }
-    }
-
-    /*override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_search, menu)
 
         // Initialize menu item
-        val menuItem : MenuItem = menu.findItem(R.id.action_search)
+        val menuItem: MenuItem = menu.findItem(R.id.action_search)
 
         // Initialize the search view
         val searchView: SearchView = MenuItemCompat.getActionView(menuItem) as SearchView
 
-        searchView.setActivated(true);
-        searchView.setQueryHint("Search note");
-        searchView.onActionViewExpanded();
-        searchView.setIconified(true);
-        searchView.clearFocus();
+        searchView.isActivated = true
+        searchView.queryHint = "Search note"
+        searchView.onActionViewExpanded()
+        searchView.isIconified = true
+        searchView.clearFocus()
 
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                return false
+                return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
 
-               *//* adapter = NotesListAdapter(fNotesList!!)
-                adapter.getFilter().filter(newText)*//*
-
-                launch{
+                viewLifecycleOwner.lifecycleScope.launch {
                     val localList: List<Note> = NotesDatabase(context!!).getDao().getAllNotes()
 
-                    val filteredList = localList.filter { it.title.contains(newText.toString()) ||
-                    it.note.contains(newText.toString())}
+                    val filteredList = localList.filter {
+                        it.title.contains(newText.toString()) ||
+                                it.note.contains(newText.toString())
+                    }
 
-                    fBinding?.setNotes(filteredList)
-                    fNotesList = filteredList
+                    fBinding.notes = filteredList
                 }
 
-                return false
+                return true
             }
         })
 
         super.onCreateOptionsMenu(menu, inflater)
-    }*/
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

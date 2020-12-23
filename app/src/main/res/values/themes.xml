@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Theme.OfflineNotes" parent="Theme.MaterialComponents.NoActionBar">
         <!-- Primary brand color. -->
@@ -24,4 +24,9 @@
     <style name="Theme.OfflineNotes.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.OfflineNotes.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="CustomFAB" parent="Theme.MaterialComponents">
+        <item name="tint">@color/colorPrimary</item>
+
+    </style>
 </resources>

@@ -21,7 +21,7 @@ fun setNotesToRecycler(recycler: RecyclerView, list: List<Note>?) {
     // check if adapter is null
     var listAdapter : NotesListAdapter? = recycler.adapter as NotesListAdapter?
     if (listAdapter == null) {
-        listAdapter = NotesListAdapter(list)
+        listAdapter = NotesListAdapter(list, recycler.context)
         recycler.adapter = listAdapter
     }
 }

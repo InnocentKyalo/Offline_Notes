@@ -3,7 +3,9 @@ package kyalo.innocent.offlinenotes.ui.add_note
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import kotlinx.coroutines.launch
 import kyalo.innocent.offlinenotes.R
@@ -16,9 +18,11 @@ import kyalo.innocent.roomdb.db.NotesDatabase
 
 class AddNoteFragment : BaseFragment() {
 
-    private lateinit var fAddNoteBinding : FragmentAddNoteBinding
+    private lateinit var fAddNoteBinding: FragmentAddNoteBinding
+    private lateinit var addNoteViewModel: AddNoteViewModel
 
-    private var localNote : Note? = null
+    private var localNote: Note? = null
+    lateinit var bookmarkMenu: MenuItem
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,6 +30,7 @@ class AddNoteFragment : BaseFragment() {
     ): View? {
         // Inflate the layout for this fragment
         fAddNoteBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_add_note, container, false)
+        addNoteViewModel = ViewModelProvider(this).get(AddNoteViewModel::class.java)
 
         setHasOptionsMenu(true)
 
@@ -60,10 +65,10 @@ class AddNoteFragment : BaseFragment() {
 
             launch {
                 context?.let {
-                    val fNote = Note(noteTitle, noteContent)
+                    val fNote = Note(noteTitle, noteContent, false)
 
                     if(localNote == null) {
-                        NotesDatabase(it).getDao().saveNote(fNote)
+                        addNoteViewModel.saveNoteInBackground(fNote)
                         it.success("Note Saved")
                     } else {
                         fNote.noteID = localNote!!.noteID
@@ -80,6 +85,7 @@ class AddNoteFragment : BaseFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_note_delete, menu)
+        bookmarkMenu = menu.findItem(R.id.action_bookmark)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -88,7 +94,7 @@ class AddNoteFragment : BaseFragment() {
 
             R.id.action_delete -> {
 
-                if(localNote != null)
+                if (localNote != null)
                     deleteNote()
                 else {
                     val navigateBackAction = AddNoteFragmentDirections.actionSaveNote()
@@ -96,9 +102,29 @@ class AddNoteFragment : BaseFragment() {
                 }
 
             }
+
+            R.id.action_bookmark -> {
+
+                var bookmarked = localNote?.isBookmarked
+                //bookmarkMenu.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_bookmark_active)
+                if (bookmarked == true) {
+                    bookmarkMenu.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_bookmark_active)
+                    bookmarked = true
+                } else {
+                    bookmarkMenu.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_bookmark_inactive)
+                    bookmarked = false
+                }
+
+                val bookmarkView: View? = view?.findViewById(R.id.action_bookmark)
+
+                bookmarkView?.setOnClickListener {
+
+                }
+            }
         }
         return super.onOptionsItemSelected(item)
     }
+
 
     private fun deleteNote() {
 

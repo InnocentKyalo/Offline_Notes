@@ -3,4 +3,9 @@
     <string name="delete_string">Delete</string>
     <string name="search_string">Search</string>
     <string name="note_hint_string">Note</string>
+    <string name="title_hint_string">Title</string>
+    <string name="fab_create_note_desc_string">Click this button to create a new note.</string>
+    <string name="unbookmark_string">Tap here to remove this note from your bookmarks</string>
+    <string name="bookmarks_string">Bookmarks</string>
+    <string name="bookmark_string">Bookmark</string>
 </resources>

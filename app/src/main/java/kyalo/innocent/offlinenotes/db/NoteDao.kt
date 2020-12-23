@@ -6,10 +6,13 @@ import androidx.room.*
 interface NoteDao {
 
     @Insert
-    suspend fun saveNote(note : Note)
+    suspend fun saveNote(note: Note)
 
     @Query("SELECT * FROM note ORDER BY noteID DESC")
-    suspend fun getAllNotes() : List<Note>
+    suspend fun getAllNotes(): List<Note>
+
+    @Query("SELECT * FROM note WHERE isBookmarked")
+    suspend fun getBookmarkedNotes(): MutableList<Note>
 
     // add multiple notes
     @Insert
@@ -19,5 +22,5 @@ interface NoteDao {
     suspend fun updateNote(note: Note)
 
     @Delete
-    suspend fun deleteNote(note : Note)
+    suspend fun deleteNote(note: Note)
 }
