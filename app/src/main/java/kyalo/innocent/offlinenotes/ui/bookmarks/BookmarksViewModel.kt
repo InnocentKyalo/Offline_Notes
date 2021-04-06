@@ -9,10 +9,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import kyalo.innocent.roomdb.db.Note
 import kyalo.innocent.roomdb.db.NotesDatabase
+import kyalo.innocent.roomdb.db.getAllNotesDatabase
 
 class BookmarksViewModel(application: Application) : AndroidViewModel(application) {
 
-    val myContext: Context = application.applicationContext
+    val myContext: Context by lazy { application.applicationContext }
 
     private var _bookmarksList = MutableLiveData<List<Note>>()
 
@@ -26,6 +27,7 @@ class BookmarksViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
 
-    suspend fun getNotes(): MutableList<Note> = NotesDatabase(myContext).getDao().getBookmarkedNotes()
+    suspend fun getNotes(): MutableList<Note> = getAllNotesDatabase(myContext)
+            .getDao().getBookmarkedNotes()
 
 }

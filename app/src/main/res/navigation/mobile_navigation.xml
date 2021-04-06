@@ -37,5 +37,9 @@
         android:id="@+id/nav_bookmarks"
         android:name="kyalo.innocent.offlinenotes.ui.bookmarks.BookmarksFragment"
         android:label="Bookmarks"
-        tools:layout="@layout/fragment_bookmarks"></fragment>
+        tools:layout="@layout/fragment_bookmarks" />
+    <dialog
+        android:id="@+id/noteBottomSheetFragment"
+        android:name="kyalo.innocent.offlinenotes.ui.add_note.NoteBottomSheetFragment"
+        android:label="NoteBottomSheetFragment" />
 </navigation>

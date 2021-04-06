@@ -9,7 +9,8 @@ data class Note(
 
         val title: String,
         val note: String,
-        var isBookmarked: Boolean = false
+        var isBookmarked: Boolean = false,
+        var timeStamtp: String? = null
 ) : Serializable{
     @PrimaryKey(autoGenerate = true)
     var noteID : Int = 0

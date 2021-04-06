@@ -6,27 +6,30 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import kyalo.innocent.offlinenotes.repository.NotesRepository
 import kyalo.innocent.roomdb.db.Note
-import kyalo.innocent.roomdb.db.NotesDatabase
+import kyalo.innocent.roomdb.db.getAllNotesDatabase
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
-    val context = application.applicationContext
+    private val notesDatabase = getAllNotesDatabase(application.applicationContext)
+    private val notesRepository: NotesRepository = NotesRepository(notesDatabase)
 
     // Notes List
-    private val _notesList = MutableLiveData<List<Note>>()
-    val notesList: LiveData<List<Note>>
-        get() = _notesList
+    val notesList = notesRepository.listOfNotes
 
     init {
         viewModelScope.launch {
-            _notesList.value = getNotesInBackground()
+
         }
     }
 
-    // Get the notes in the background
-    suspend fun getNotesInBackground(): List<Note> {
-        return NotesDatabase(context).getDao().getAllNotes()
+    // Get all Notes from DB
+    private fun refreshNotesList() {
     }
+
+    // Query database for notes
+    fun searchNotes(searchQuery: String): LiveData<List<Note>> = notesDatabase.getDao().searchNote(searchQuery)
+
 
 }

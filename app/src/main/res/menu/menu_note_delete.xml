@@ -8,10 +8,5 @@
         android:icon="@drawable/ic_delete"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/action_bookmark"
-        android:icon="@drawable/ic_bookmark_inactive"
-        android:title="@string/bookmark_string"
-        app:showAsAction="always" />
 
 </menu>

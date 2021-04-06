@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import kotlinx.coroutines.launch
 import kyalo.innocent.offlinenotes.R
+import kyalo.innocent.offlinenotes.adapters.NotesListAdapter
 import kyalo.innocent.offlinenotes.databinding.FragmentHomeBinding
 import kyalo.innocent.roomdb.db.Note
 import kyalo.innocent.roomdb.db.NotesDatabase
@@ -45,41 +46,40 @@ class HomeFragment : Fragment() {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_search, menu)
 
-        // Initialize menu item
-        val menuItem: MenuItem = menu.findItem(R.id.action_search)
+        val item = menu.findItem(R.id.action_search)
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW or MenuItem.SHOW_AS_ACTION_IF_ROOM)
 
-        // Initialize the search view
-        val searchView: SearchView = MenuItemCompat.getActionView(menuItem) as SearchView
+        val searchView = item.actionView as SearchView?
 
-        searchView.isActivated = true
-        searchView.queryHint = "Search note"
-        searchView.onActionViewExpanded()
-        searchView.isIconified = true
-        searchView.clearFocus()
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
 
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
+                if (query != null)
+                    searchDatabase(query)
+
                 return true
             }
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-
-                viewLifecycleOwner.lifecycleScope.launch {
-                    val localList: List<Note> = NotesDatabase(context!!).getDao().getAllNotes()
-
-                    val filteredList = localList.filter {
-                        it.title.contains(newText.toString()) ||
-                                it.note.contains(newText.toString())
-                    }
-
-                    fBinding.notes = filteredList
-                }
+            override fun onQueryTextChange(query: String?): Boolean {
+                // Here is where we are going to implement the filter logic
+                query?.let { searchDatabase(it) }
 
                 return true
             }
         })
+        searchView?.setOnClickListener { }
 
         super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    private fun searchDatabase(query: String) {
+        val searchQuery = "%$query%"
+
+        fHomeViewModel.searchNotes(searchQuery).observe(viewLifecycleOwner, { usersQuery ->
+
+            val myAdapter = activity?.applicationContext?.let { NotesListAdapter(usersQuery, it) }
+            fBinding.notesListReycler.adapter = myAdapter
+        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,5 +1,6 @@
 package kyalo.innocent.roomdb.db
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 
 @Dao
@@ -9,7 +10,7 @@ interface NoteDao {
     suspend fun saveNote(note: Note)
 
     @Query("SELECT * FROM note ORDER BY noteID DESC")
-    suspend fun getAllNotes(): List<Note>
+    fun getAllNotes(): LiveData<List<Note>>
 
     @Query("SELECT * FROM note WHERE isBookmarked")
     suspend fun getBookmarkedNotes(): MutableList<Note>
@@ -23,4 +24,7 @@ interface NoteDao {
 
     @Delete
     suspend fun deleteNote(note: Note)
+
+    @Query("SELECT * FROM note WHERE title || note LIKE :searchQuery")
+    fun searchNote(searchQuery: String): LiveData<List<Note>>
 }

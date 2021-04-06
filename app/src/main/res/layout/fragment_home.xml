@@ -37,13 +37,13 @@
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="24dp"
             android:clickable="true"
-            android:backgroundTint="@color/colorPrimary"
+            android:backgroundTint="@color/primaryTextColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:contentDescription="@string/fab_create_note_desc_string"
             android:focusable="true"
             android:src="@drawable/ic_baseline_add"
-            app:tint="@color/white" />
+            app:tint="@color/secondaryTextColor" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
 

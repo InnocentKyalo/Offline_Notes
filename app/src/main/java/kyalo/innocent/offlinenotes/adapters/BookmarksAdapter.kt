@@ -12,6 +12,7 @@ import kyalo.innocent.offlinenotes.R
 import kyalo.innocent.offlinenotes.databinding.BookmarksLayoutItemBinding
 import kyalo.innocent.roomdb.db.Note
 import kyalo.innocent.roomdb.db.NotesDatabase
+import kyalo.innocent.roomdb.db.getAllNotesDatabase
 import kotlin.coroutines.CoroutineContext
 
 class BookmarksAdapter(private var bookmarksList: MutableList<Note>, var context: Context) :
@@ -59,7 +60,7 @@ class BookmarksAdapter(private var bookmarksList: MutableList<Note>, var context
         bookmarkNote.isBookmarked = false
 
         launch(Dispatchers.IO) {
-            NotesDatabase(context).getDao().updateNote(bookmarkNote)
+            getAllNotesDatabase(context).getDao().updateNote(bookmarkNote)
 
             withContext(Dispatchers.Main) {
                 bookmarksList.removeAt(removedPos)

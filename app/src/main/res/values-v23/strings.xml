@@ -8,4 +8,6 @@
     <string name="unbookmark_string">Tap here to remove this note from your bookmarks</string>
     <string name="bookmarks_string">Bookmarks</string>
     <string name="bookmark_string">Bookmark</string>
+    <string name="display_actions_string">Display other actions</string>
+    <string name="share_string">Share</string>
 </resources>

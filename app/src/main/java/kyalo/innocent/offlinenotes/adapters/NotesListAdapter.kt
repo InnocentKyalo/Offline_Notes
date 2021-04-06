@@ -17,6 +17,7 @@ import kyalo.innocent.offlinenotes.databinding.LayoutItemBinding
 import kyalo.innocent.offlinenotes.ui.home.HomeFragmentDirections
 import kyalo.innocent.roomdb.db.Note
 import kyalo.innocent.roomdb.db.NotesDatabase
+import kyalo.innocent.roomdb.db.getAllNotesDatabase
 import kotlin.coroutines.CoroutineContext
 
 
@@ -85,10 +86,10 @@ class NotesListAdapter(private var notesList: List<Note>, private var context: C
 
         if (bookmarkState) {
             displayedNote.isBookmarked = true
-            NotesDatabase(context).getDao().updateNote(displayedNote)
+            getAllNotesDatabase(context).getDao().updateNote(displayedNote)
         } else {
             displayedNote.isBookmarked = false
-            NotesDatabase(context).getDao().updateNote(displayedNote)
+            getAllNotesDatabase(context).getDao().updateNote(displayedNote)
         }
     }
 

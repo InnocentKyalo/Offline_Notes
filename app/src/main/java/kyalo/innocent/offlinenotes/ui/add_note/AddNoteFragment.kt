@@ -2,11 +2,15 @@ package kyalo.innocent.offlinenotes.ui.add_note
 
 import android.os.Bundle
 import android.view.*
+import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.NavHostFragment
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
 import kyalo.innocent.offlinenotes.R
 import kyalo.innocent.offlinenotes.databinding.FragmentAddNoteBinding
@@ -14,6 +18,7 @@ import kyalo.innocent.offlinenotes.utils.BaseFragment
 import kyalo.innocent.offlinenotes.utils.success
 import kyalo.innocent.roomdb.db.Note
 import kyalo.innocent.roomdb.db.NotesDatabase
+import kyalo.innocent.roomdb.db.getAllNotesDatabase
 
 
 class AddNoteFragment : BaseFragment() {
@@ -29,7 +34,11 @@ class AddNoteFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        fAddNoteBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_add_note, container, false)
+        fAddNoteBinding = DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_add_note,
+                container,
+                false)
         addNoteViewModel = ViewModelProvider(this).get(AddNoteViewModel::class.java)
 
         setHasOptionsMenu(true)
@@ -37,8 +46,16 @@ class AddNoteFragment : BaseFragment() {
         return fAddNoteBinding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val tripleDots: ImageButton = view.findViewById(R.id.triple_dots_action)
+        val notesBottomSheet = NoteBottomSheetFragment()
+        val bottomSheet: BottomSheetDialog? = activity?.let { BottomSheetDialog(it) }
+
+        tripleDots.setOnClickListener{
+            notesBottomSheet.show(parentFragmentManager, "BottomFragment")
+        }
 
         arguments.let {
             localNote = AddNoteFragmentArgs.fromBundle(it!!).note
@@ -65,14 +82,15 @@ class AddNoteFragment : BaseFragment() {
 
             launch {
                 context?.let {
-                    val fNote = Note(noteTitle, noteContent, false)
+                    val time = addNoteViewModel.formatTimeToString(addNoteViewModel.getTheCurrentTimeStamp())
+                    val fNote = Note(noteTitle, noteContent, false, time)
 
                     if(localNote == null) {
                         addNoteViewModel.saveNoteInBackground(fNote)
                         it.success("Note Saved")
                     } else {
                         fNote.noteID = localNote!!.noteID
-                        NotesDatabase(it).getDao().updateNote(fNote)
+                        getAllNotesDatabase(it).getDao().updateNote(fNote)
                         it.success("Note Updated")
                     }
 
@@ -85,7 +103,6 @@ class AddNoteFragment : BaseFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_note_delete, menu)
-        bookmarkMenu = menu.findItem(R.id.action_bookmark)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
@@ -103,7 +120,7 @@ class AddNoteFragment : BaseFragment() {
 
             }
 
-            R.id.action_bookmark -> {
+            /*R.id.action_bookmark -> {
 
                 var bookmarked = localNote?.isBookmarked
                 //bookmarkMenu.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_bookmark_active)
@@ -120,12 +137,13 @@ class AddNoteFragment : BaseFragment() {
                 bookmarkView?.setOnClickListener {
 
                 }
-            }
+            }*/
         }
         return super.onOptionsItemSelected(item)
     }
 
 
+    // Logic to delete a note
     private fun deleteNote() {
 
         AlertDialog.Builder(requireContext()).apply {
@@ -135,7 +153,7 @@ class AddNoteFragment : BaseFragment() {
 
                 launch {
 
-                    NotesDatabase(context).getDao().deleteNote(localNote!!)
+                    getAllNotesDatabase(context).getDao().deleteNote(localNote!!)
 
                     val navigateBackAction = AddNoteFragmentDirections.actionSaveNote()
                     Navigation.findNavController(requireView()).navigate(navigateBackAction)
