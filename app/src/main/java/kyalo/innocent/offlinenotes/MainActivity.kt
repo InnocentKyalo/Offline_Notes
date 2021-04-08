@@ -2,16 +2,21 @@ package kyalo.innocent.offlinenotes
 
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.*
 import com.google.android.material.navigation.NavigationView
+import kotlinx.coroutines.launch
+import kyalo.innocent.offlinenotes.ui.add_note.AddNoteFragment
+import kyalo.innocent.offlinenotes.ui.add_note.AddNoteFragmentDirections
+import kyalo.innocent.offlinenotes.utils.success
+import kyalo.innocent.roomdb.db.Note
+import kyalo.innocent.roomdb.db.getAllNotesDatabase
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(setOf(
                 R.id.nav_home, R.id.nav_bookmarks), drawerLayout)
 
-        setupActionBarWithNavController(navController, appBarConfiguration)
+        NavigationUI.setupActionBarWithNavController( this, navController, appBarConfiguration)
         navView.setupWithNavController(navController)
     }
 
@@ -48,6 +53,16 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+        return navController.navigateUp() || super.onSupportNavigateUp()
+        //return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    override fun onOptionsItemSelected(menuItem : MenuItem) : Boolean {
+        if (menuItem.getItemId() == android.R.id.home) {
+            onBackPressedDispatcher.onBackPressed()
+            return true // must return true to consume it here
+
+        }
+        return super.onOptionsItemSelected(menuItem)
     }
 }

@@ -1,23 +1,27 @@
 package kyalo.innocent.offlinenotes.ui.add_note
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
 import android.widget.ImageButton
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.Navigation
-import androidx.navigation.fragment.NavHostFragment
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.launch
 import kyalo.innocent.offlinenotes.R
 import kyalo.innocent.offlinenotes.databinding.FragmentAddNoteBinding
+import kyalo.innocent.offlinenotes.utils.BOTTOM_SHEET_INTENT_KEY
+import kyalo.innocent.offlinenotes.utils.BROADCAST_KEY
 import kyalo.innocent.offlinenotes.utils.BaseFragment
-import kyalo.innocent.offlinenotes.utils.success
 import kyalo.innocent.roomdb.db.Note
-import kyalo.innocent.roomdb.db.NotesDatabase
 import kyalo.innocent.roomdb.db.getAllNotesDatabase
 
 
@@ -25,13 +29,22 @@ class AddNoteFragment : BaseFragment() {
 
     private lateinit var fAddNoteBinding: FragmentAddNoteBinding
     private lateinit var addNoteViewModel: AddNoteViewModel
-
     private var localNote: Note? = null
-    lateinit var bookmarkMenu: MenuItem
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        activity?.onBackPressedDispatcher?.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                this.isEnabled = true
+                saveNote()
+            }
+        })
+    }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
         fAddNoteBinding = DataBindingUtil.inflate(
@@ -39,6 +52,8 @@ class AddNoteFragment : BaseFragment() {
                 R.layout.fragment_add_note,
                 container,
                 false)
+
+
         addNoteViewModel = ViewModelProvider(this).get(AddNoteViewModel::class.java)
 
         setHasOptionsMenu(true)
@@ -50,54 +65,18 @@ class AddNoteFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val tripleDots: ImageButton = view.findViewById(R.id.triple_dots_action)
-        val notesBottomSheet = NoteBottomSheetFragment()
-        val bottomSheet: BottomSheetDialog? = activity?.let { BottomSheetDialog(it) }
+        val notesBottomSheet = NoteBottomSheetFragment(coroutineContext)
 
         tripleDots.setOnClickListener{
+            notesBottomSheet.bottomSheetNote = localNote
             notesBottomSheet.show(parentFragmentManager, "BottomFragment")
         }
 
+        // Get Note arguments from previous fragment
         arguments.let {
             localNote = AddNoteFragmentArgs.fromBundle(it!!).note
             fAddNoteBinding.edtNoteTitle.setText(localNote?.title)
             fAddNoteBinding.edtNoteContent.setText(localNote?.note)
-        }
-
-        fAddNoteBinding.fabSaveNote.setOnClickListener { view ->
-
-            val noteTitle = fAddNoteBinding.edtNoteTitle.text.toString().trim()
-            val noteContent = fAddNoteBinding.edtNoteContent.text.toString().trim()
-
-            if (noteTitle.isEmpty()) {
-                fAddNoteBinding.edtNoteTitle.error = "Note title is empty"
-                fAddNoteBinding.edtNoteTitle.requestFocus()
-                return@setOnClickListener
-            }
-
-            if (noteContent.isEmpty()) {
-                fAddNoteBinding.edtNoteContent.error = "Note content is empty"
-                fAddNoteBinding.edtNoteContent.requestFocus()
-                return@setOnClickListener
-            }
-
-            launch {
-                context?.let {
-                    val time = addNoteViewModel.formatTimeToString(addNoteViewModel.getTheCurrentTimeStamp())
-                    val fNote = Note(noteTitle, noteContent, false, time)
-
-                    if(localNote == null) {
-                        addNoteViewModel.saveNoteInBackground(fNote)
-                        it.success("Note Saved")
-                    } else {
-                        fNote.noteID = localNote!!.noteID
-                        getAllNotesDatabase(it).getDao().updateNote(fNote)
-                        it.success("Note Updated")
-                    }
-
-                    val navigateBackAction = AddNoteFragmentDirections.actionSaveNote()
-                    Navigation.findNavController(view).navigate(navigateBackAction)
-                }
-            }
         }
     }
 
@@ -142,6 +121,33 @@ class AddNoteFragment : BaseFragment() {
         return super.onOptionsItemSelected(item)
     }
 
+    // Logic to save note
+    private fun saveNote() {
+        val noteTitle = fAddNoteBinding.edtNoteTitle.text.toString().trim()
+        val noteContent = fAddNoteBinding.edtNoteContent.text.toString().trim()
+
+        launch {
+            context?.let {
+                val noteTimeStamp = addNoteViewModel.formatTimeToString(addNoteViewModel.getTheCurrentTimeStamp())
+                var fNote: Note? = null
+
+                if (!noteTitle.equals("") && !noteContent.equals("") && !noteTimeStamp.equals(""))
+                    fNote = Note(noteTitle, noteContent, false, noteTimeStamp)
+
+                if(localNote == null) {
+                    if (fNote != null)
+                        addNoteViewModel.saveNoteInBackground(fNote)
+                    //it.success("Note Saved")
+                } else {
+                    fNote?.noteID = localNote!!.noteID
+                    fNote.let { it1 -> it1?.let { it2 -> getAllNotesDatabase(it).getDao().updateNote(it2) } }
+                }
+
+                val navigateBackAction = AddNoteFragmentDirections.actionSaveNote()
+                view?.let { it1 -> Navigation.findNavController(it1).navigate(navigateBackAction) }
+            }
+        }
+    }
 
     // Logic to delete a note
     private fun deleteNote() {
@@ -159,9 +165,47 @@ class AddNoteFragment : BaseFragment() {
                     Navigation.findNavController(requireView()).navigate(navigateBackAction)
                 }
             }
-            setNegativeButton("Cancel") {_,_ ->
+            setNegativeButton("Cancel") { _, _ ->
 
             }
         }.create().show()
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        //enable menu
+        setHasOptionsMenu(true)
+
+        requireActivity()
+                .onBackPressedDispatcher
+                .addCallback(this){
+                    //true means that the callback is enabled
+                    this.isEnabled = true
+                    saveNote()
+                }
+    }
+
+    private val someBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val receivedString = intent.getStringArrayExtra(BOTTOM_SHEET_INTENT_KEY)
+            if (receivedString?.equals("delete") == true) {
+                deleteNote()
+                Toast.makeText(getContext(), receivedString.toString(), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        context?.let {
+            LocalBroadcastManager.getInstance(it).registerReceiver(someBroadcastReceiver,
+                IntentFilter(BROADCAST_KEY))
+        }
+    }
+
+    override fun onPause() {
+        context?.let { LocalBroadcastManager.getInstance(it).unregisterReceiver(someBroadcastReceiver) }
+        super.onPause()
     }
 }

@@ -32,6 +32,9 @@
             app:argType="kyalo.innocent.roomdb.db.Note"
             android:defaultValue="@null"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_to_bottom_sheet"
+            app:destination="@id/noteBottomSheetFragment" />
     </fragment>
     <fragment
         android:id="@+id/nav_bookmarks"
@@ -40,6 +43,13 @@
         tools:layout="@layout/fragment_bookmarks" />
     <dialog
         android:id="@+id/noteBottomSheetFragment"
-        android:name="kyalo.innocent.offlinenotes.ui.add_note.NoteBottomSheetFragment"
-        android:label="NoteBottomSheetFragment" />
+        android:name="kyalo.innocent.off.NoteBottomSheetFragment"
+        android:label="NoteBottomSheetFragment">
+
+        <argument
+            android:name="BottomSheetNote"
+            app:argType="kyalo.innocent.roomdb.db.Note"
+            android:defaultValue="@null"
+            app:nullable="true" />
+    </dialog>
 </navigation>
