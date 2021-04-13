@@ -78,8 +78,11 @@ class HomeFragment : Fragment() {
 
         fHomeViewModel.searchNotes(searchQuery).observe(viewLifecycleOwner, { usersQuery ->
 
-            val myAdapter = activity?.applicationContext?.let { NotesListAdapter(usersQuery, it) }
-            fBinding.notesListReycler.adapter = myAdapter
+            //val myAdapter: NotesListAdapter?
+            fBinding.notes = usersQuery
+//            myAdapter = activity?.applicationContext?.let { NotesListAdapter(usersQuery, it) }
+//            fBinding.notesListReycler.adapter?.notifyDataSetChanged()
+//            fBinding.notesListReycler.adapter = myAdapter
         })
     }
 

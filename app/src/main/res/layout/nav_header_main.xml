@@ -20,7 +20,7 @@
         android:text="@string/offline_notes_string"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
         android:textSize="36sp"
-        android:fontFamily="sans-serif"/>
+        android:fontFamily="sans-serif" />
 
 
 </LinearLayout>
