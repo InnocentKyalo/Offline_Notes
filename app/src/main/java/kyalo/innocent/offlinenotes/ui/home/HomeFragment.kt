@@ -47,7 +47,8 @@ class HomeFragment : Fragment() {
         inflater.inflate(R.menu.menu_search, menu)
 
         val item = menu.findItem(R.id.action_search)
-        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW or MenuItem.SHOW_AS_ACTION_IF_ROOM)
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        item.setTitle("Search your notes")
 
         val searchView = item.actionView as SearchView?
 

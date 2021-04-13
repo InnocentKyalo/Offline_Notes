@@ -43,7 +43,7 @@
         tools:layout="@layout/fragment_bookmarks" />
     <dialog
         android:id="@+id/noteBottomSheetFragment"
-        android:name="kyalo.innocent.off.NoteBottomSheetFragment"
+        android:name="kyalo.innocent.offlinenotes.ui.add_note.NoteBottomSheetFragment"
         android:label="NoteBottomSheetFragment">
 
         <argument

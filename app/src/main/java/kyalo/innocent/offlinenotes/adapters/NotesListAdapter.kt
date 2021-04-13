@@ -45,10 +45,10 @@ class NotesListAdapter(private var notesList: List<Note>, private var context: C
         holder.noteBinding!!.setVariable(BR.noteItem, displayedNote)
         holder.noteBinding!!.executePendingBindings()
 
-        if (displayedNote.isBookmarked)
+        /*if (displayedNote.isBookmarked)
             holder.noteBinding?.imageBookmark?.setImageResource(R.drawable.ic_bookmark_active)
         else
-            holder.noteBinding?.imageBookmark?.setImageResource(R.drawable.ic_bookmark_inactive)
+            holder.noteBinding?.imageBookmark?.setImageResource(R.drawable.ic_bookmark_inactive)*/
 
         // add on note click listener
         holder.itemView.setOnClickListener {
@@ -59,7 +59,7 @@ class NotesListAdapter(private var notesList: List<Note>, private var context: C
 
         var bookmarkState = displayedNote.isBookmarked
 
-        holder.noteBinding!!.imageBookmark.setOnClickListener {
+        /*holder.noteBinding!!.imageBookmark.setOnClickListener {
 
             if (bookmarkState) {
                 holder.noteBinding!!.imageBookmark.setImageResource(R.drawable.ic_bookmark_inactive)
@@ -79,7 +79,7 @@ class NotesListAdapter(private var notesList: List<Note>, private var context: C
                 }
 
             }
-        }
+        }*/
     }
 
     private suspend fun updateDatabase(displayedNote: Note, bookmarkState: Boolean) {

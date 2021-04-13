@@ -16,14 +16,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kyalo.innocent.off.NoteBottomSheetFragmentArgs
 import kyalo.innocent.offlinenotes.R
 import kyalo.innocent.offlinenotes.utils.BOTTOM_SHEET_INTENT_KEY
 import kyalo.innocent.offlinenotes.utils.BROADCAST_KEY
 import kyalo.innocent.roomdb.db.Note
 import kyalo.innocent.roomdb.db.getAllNotesDatabase
 import kotlin.coroutines.CoroutineContext
-
 
 class NoteBottomSheetFragment(override val coroutineContext: CoroutineContext) : BottomSheetDialogFragment(),
         CoroutineScope {
@@ -58,10 +56,6 @@ class NoteBottomSheetFragment(override val coroutineContext: CoroutineContext) :
         context?.let { Toasty.info(it, bottomSheetNote?.title.toString(), Toasty.LENGTH_LONG).show() }
 
         delete_layout.setOnClickListener {
-            val someIntent = Intent(BROADCAST_KEY)
-            someIntent.putExtra(BOTTOM_SHEET_INTENT_KEY, "delete")
-            context?.let { it1 -> LocalBroadcastManager.getInstance(it1).sendBroadcast(someIntent) }
-            deleteNote()
             NavHostFragment.findNavController(this).navigate(R.id.nav_home)
             dismiss()
         }

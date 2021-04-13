@@ -1,6 +1,7 @@
 package kyalo.innocent.offlinenotes.ui.add_note
 
 import android.app.Application
+import android.content.Context
 import android.text.format.DateFormat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,7 +33,13 @@ class AddNoteViewModel(application: Application) : AndroidViewModel(application)
     fun formatTimeToString(time: Long): String {
         val calendar = Calendar.getInstance(Locale.ENGLISH)
         calendar.timeInMillis = time * 1000L
-        val date = DateFormat.format("dd-MM-yyyy",calendar).toString()
+        val date = DateFormat.format("dd-MM-yyyy", calendar).toString()
         return date
+    }
+
+    fun deleteNote(note: Note, context: Context) {
+        viewModelScope.launch {
+            context?.let { getAllNotesDatabase(context).getDao().deleteNote(note!!) }
+        }
     }
 }

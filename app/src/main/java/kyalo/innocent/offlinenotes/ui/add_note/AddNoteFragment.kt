@@ -7,14 +7,19 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.view.*
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.Navigation
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.android.synthetic.main.fragment_add_note.*
+import kotlinx.android.synthetic.main.note_bottom_dialog.*
 import kotlinx.coroutines.launch
 import kyalo.innocent.offlinenotes.R
 import kyalo.innocent.offlinenotes.databinding.FragmentAddNoteBinding
@@ -40,6 +45,9 @@ class AddNoteFragment : BaseFragment() {
                 saveNote()
             }
         })
+
+        // Hide the toolbar
+        //(activity as AppCompatActivity?)!!.getSupportActionBar()!!.hide()
     }
 
     override fun onCreateView(
@@ -65,11 +73,10 @@ class AddNoteFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val tripleDots: ImageButton = view.findViewById(R.id.triple_dots_action)
-        val notesBottomSheet = NoteBottomSheetFragment(coroutineContext)
 
         tripleDots.setOnClickListener{
-            notesBottomSheet.bottomSheetNote = localNote
-            notesBottomSheet.show(parentFragmentManager, "BottomFragment")
+
+            showBottomSheetDialog()
         }
 
         // Get Note arguments from previous fragment
@@ -86,20 +93,10 @@ class AddNoteFragment : BaseFragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
+        /*when(item.itemId) {
 
-            R.id.action_delete -> {
 
-                if (localNote != null)
-                    deleteNote()
-                else {
-                    val navigateBackAction = AddNoteFragmentDirections.actionSaveNote()
-                    Navigation.findNavController(requireView()).navigate(navigateBackAction)
-                }
-
-            }
-
-            /*R.id.action_bookmark -> {
+            *//*R.id.action_bookmark -> {
 
                 var bookmarked = localNote?.isBookmarked
                 //bookmarkMenu.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_bookmark_active)
@@ -116,8 +113,8 @@ class AddNoteFragment : BaseFragment() {
                 bookmarkView?.setOnClickListener {
 
                 }
-            }*/
-        }
+            }*//*
+        }*/
         return super.onOptionsItemSelected(item)
     }
 
@@ -131,17 +128,23 @@ class AddNoteFragment : BaseFragment() {
                 val noteTimeStamp = addNoteViewModel.formatTimeToString(addNoteViewModel.getTheCurrentTimeStamp())
                 var fNote: Note? = null
 
-                if (!noteTitle.equals("") && !noteContent.equals("") && !noteTimeStamp.equals(""))
+                if (!noteTitle.equals("") || !noteContent.equals("")) {
                     fNote = Note(noteTitle, noteContent, false, noteTimeStamp)
+                    //localNote = fNote
+                }
 
                 if(localNote == null) {
-                    if (fNote != null)
+                    if ((fNote?.title != null) || (fNote?.note == null))
                         addNoteViewModel.saveNoteInBackground(fNote)
                     //it.success("Note Saved")
                 } else {
                     fNote?.noteID = localNote!!.noteID
                     fNote.let { it1 -> it1?.let { it2 -> getAllNotesDatabase(it).getDao().updateNote(it2) } }
                 }
+
+                // Force the edit texts to close
+                edt_note_title.clearFocus()
+                edt_note_content.clearFocus()
 
                 val navigateBackAction = AddNoteFragmentDirections.actionSaveNote()
                 view?.let { it1 -> Navigation.findNavController(it1).navigate(navigateBackAction) }
@@ -151,24 +154,7 @@ class AddNoteFragment : BaseFragment() {
 
     // Logic to delete a note
     private fun deleteNote() {
-
-        AlertDialog.Builder(requireContext()).apply {
-            setTitle("Are you sure?")
-            setMessage("This note will be deleted permanently")
-            setPositiveButton("OK") { _, _ ->
-
-                launch {
-
-                    getAllNotesDatabase(context).getDao().deleteNote(localNote!!)
-
-                    val navigateBackAction = AddNoteFragmentDirections.actionSaveNote()
-                    Navigation.findNavController(requireView()).navigate(navigateBackAction)
-                }
-            }
-            setNegativeButton("Cancel") { _, _ ->
-
-            }
-        }.create().show()
+        localNote?.let { context?.let { it1 -> addNoteViewModel.deleteNote(it, it1) } }
     }
 
     override fun onAttach(context: Context) {
@@ -186,26 +172,45 @@ class AddNoteFragment : BaseFragment() {
                 }
     }
 
-    private val someBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            val receivedString = intent.getStringArrayExtra(BOTTOM_SHEET_INTENT_KEY)
-            if (receivedString?.equals("delete") == true) {
+    // Display the Bottom Sheet & Handle onClickListeners
+    private fun showBottomSheetDialog()
+    {
+
+        val bottomSheetDialog: BottomSheetDialog? = context?.let { BottomSheetDialog (it) };
+        bottomSheetDialog?.setContentView(R.layout.note_bottom_dialog);
+
+        val deleteLayout: LinearLayout? = bottomSheetDialog?.findViewById(R.id.delete_layout)
+        val shareLayout: LinearLayout? = bottomSheetDialog?.findViewById(R.id.share_layout)
+
+        bottomSheetDialog?.show();
+
+        deleteLayout?.setOnClickListener {
+            if (localNote != null)
                 deleteNote()
-                Toast.makeText(getContext(), receivedString.toString(), Toast.LENGTH_SHORT).show()
+            navigateToHomeAndDismissBottomSheet(bottomSheetDialog)
+        }
+
+        shareLayout?.setOnClickListener {
+
+            if(!localNote?.title.equals("") || !localNote?.note.equals("")) {
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, "${localNote?.title}\n\n" +
+                            "${localNote?.note}\n\n" +
+                            "Last Edited: ${localNote?.timeStamtp}")
+                    type = "text/plain"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
             }
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        context?.let {
-            LocalBroadcastManager.getInstance(it).registerReceiver(someBroadcastReceiver,
-                IntentFilter(BROADCAST_KEY))
-        }
-    }
-
-    override fun onPause() {
-        context?.let { LocalBroadcastManager.getInstance(it).unregisterReceiver(someBroadcastReceiver) }
-        super.onPause()
+    // Navigate to Home Fragment & dismiss bottom sheet
+    private fun navigateToHomeAndDismissBottomSheet(bottomSheetDialog: BottomSheetDialog) {
+        val navigateBackAction = AddNoteFragmentDirections.actionSaveNote()
+        Navigation.findNavController(requireView()).navigate(navigateBackAction)
+        bottomSheetDialog.dismiss()
     }
 }

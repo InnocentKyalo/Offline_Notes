@@ -24,4 +24,5 @@
     <string name="display_actions_string">Display other actions</string>
     <string name="share_string">Share</string>
     <string name="label_string">Label</string>
+    <string name="offline_notes_string">Offline Notes</string>
 </resources>
