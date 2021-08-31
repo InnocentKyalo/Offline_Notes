@@ -25,4 +25,5 @@
     <string name="share_string">Share</string>
     <string name="label_string">Label</string>
     <string name="offline_notes_string">Offline Notes</string>
+    <string name="choose_color">Choose color</string>
 </resources>

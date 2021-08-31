@@ -1,30 +1,29 @@
 package kyalo.innocent.offlinenotes.ui.add_note
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.Navigation
+import com.github.dhaval2404.colorpicker.MaterialColorPickerDialog
+import com.github.dhaval2404.colorpicker.listener.ColorListener
+import com.github.dhaval2404.colorpicker.model.ColorSwatch
+import com.github.dhaval2404.colorpicker.util.ColorUtil
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_add_note.*
-import kotlinx.android.synthetic.main.note_bottom_dialog.*
 import kotlinx.coroutines.launch
 import kyalo.innocent.offlinenotes.R
 import kyalo.innocent.offlinenotes.databinding.FragmentAddNoteBinding
-import kyalo.innocent.offlinenotes.utils.BOTTOM_SHEET_INTENT_KEY
-import kyalo.innocent.offlinenotes.utils.BROADCAST_KEY
 import kyalo.innocent.offlinenotes.utils.BaseFragment
 import kyalo.innocent.roomdb.db.Note
 import kyalo.innocent.roomdb.db.getAllNotesDatabase
@@ -35,6 +34,7 @@ class AddNoteFragment : BaseFragment() {
     private lateinit var fAddNoteBinding: FragmentAddNoteBinding
     private lateinit var addNoteViewModel: AddNoteViewModel
     private var localNote: Note? = null
+    private var mMaterialColorCircle = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,32 +92,6 @@ class AddNoteFragment : BaseFragment() {
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        /*when(item.itemId) {
-
-
-            *//*R.id.action_bookmark -> {
-
-                var bookmarked = localNote?.isBookmarked
-                //bookmarkMenu.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_bookmark_active)
-                if (bookmarked == true) {
-                    bookmarkMenu.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_bookmark_active)
-                    bookmarked = true
-                } else {
-                    bookmarkMenu.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_bookmark_inactive)
-                    bookmarked = false
-                }
-
-                val bookmarkView: View? = view?.findViewById(R.id.action_bookmark)
-
-                bookmarkView?.setOnClickListener {
-
-                }
-            }*//*
-        }*/
-        return super.onOptionsItemSelected(item)
-    }
-
     // Logic to save note
     private fun saveNote() {
         val noteTitle = fAddNoteBinding.edtNoteTitle.text.toString().trim()
@@ -173,16 +147,43 @@ class AddNoteFragment : BaseFragment() {
     }
 
     // Display the Bottom Sheet & Handle onClickListeners
-    private fun showBottomSheetDialog()
-    {
+    private fun showBottomSheetDialog() {
 
-        val bottomSheetDialog: BottomSheetDialog? = context?.let { BottomSheetDialog (it) };
-        bottomSheetDialog?.setContentView(R.layout.note_bottom_dialog);
+        val bottomSheetDialog: BottomSheetDialog? = context?.let { BottomSheetDialog(it) }
+        bottomSheetDialog?.setContentView(R.layout.note_bottom_dialog)
 
         val deleteLayout: LinearLayout? = bottomSheetDialog?.findViewById(R.id.delete_layout)
         val shareLayout: LinearLayout? = bottomSheetDialog?.findViewById(R.id.share_layout)
+        val chooseColorLayout: LinearLayout? =
+            bottomSheetDialog?.findViewById(R.id.choose_color_layout)
+        val addNoteLayoutTwo: ConstraintLayout? =
+            bottomSheetDialog?.findViewById(R.id.add_note_layout_two)
 
-        bottomSheetDialog?.show();
+        chooseColorLayout?.setOnClickListener {
+            MaterialColorPickerDialog
+                .Builder(requireActivity())
+                .setColorSwatch(ColorSwatch._500)
+                .setDefaultColor(mMaterialColorCircle)
+                .setColorListener(object : ColorListener {
+                    override fun onColorSelected(color: Int, colorHex: String) {
+                        mMaterialColorCircle = colorHex
+                        add_note_layout.setBackgroundColor(color)
+                        setButtonBackground(color)
+                        edt_note_title.setBackgroundColor(color)
+                        edt_note_content.setBackgroundColor(color)
+                        chooseColorLayout.setBackgroundColor(color)
+                        shareLayout?.setBackgroundColor(color)
+                        deleteLayout?.setBackgroundColor(color)
+                        addNoteLayoutTwo?.setBackgroundColor(color)
+                    }
+                })
+                .setDismissListener {
+                    Log.d("MaterialDialogPicker", "Handle dismiss event")
+                }
+                .show()
+        }
+
+        bottomSheetDialog?.show()
 
         deleteLayout?.setOnClickListener {
             if (localNote != null)
@@ -192,7 +193,7 @@ class AddNoteFragment : BaseFragment() {
 
         shareLayout?.setOnClickListener {
 
-            if(!localNote?.title.equals("") || !localNote?.note.equals("")) {
+            if (!localNote?.title.equals("") || !localNote?.note.equals("")) {
                 val sendIntent: Intent = Intent().apply {
                     action = Intent.ACTION_SEND
                     putExtra(Intent.EXTRA_TEXT, "${localNote?.title}\n\n" +
@@ -212,5 +213,17 @@ class AddNoteFragment : BaseFragment() {
         val navigateBackAction = AddNoteFragmentDirections.actionSaveNote()
         Navigation.findNavController(requireView()).navigate(navigateBackAction)
         bottomSheetDialog.dismiss()
+    }
+
+    private fun setButtonBackground(color: Int) {
+        if (ColorUtil.isDarkColor(color)) {
+            edt_note_title.setTextColor(Color.WHITE)
+            edt_note_content.setTextColor(Color.WHITE)
+        } else {
+            edt_note_title.setTextColor(Color.BLACK)
+            edt_note_content.setTextColor(Color.BLACK)
+        }
+        edt_note_title.backgroundTintList = ColorStateList.valueOf(color)
+        edt_note_content.backgroundTintList = ColorStateList.valueOf(color)
     }
 }

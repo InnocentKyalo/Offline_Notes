@@ -7,7 +7,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import kyalo.innocent.roomdb.db.Note
-import kyalo.innocent.roomdb.db.NotesDatabase
 import kyalo.innocent.roomdb.db.getAllNotesDatabase
 import java.util.*
 
@@ -39,7 +38,7 @@ class AddNoteViewModel(application: Application) : AndroidViewModel(application)
 
     fun deleteNote(note: Note, context: Context) {
         viewModelScope.launch {
-            context?.let { getAllNotesDatabase(context).getDao().deleteNote(note!!) }
+            context.let { getAllNotesDatabase(context).getDao().deleteNote(note) }
         }
     }
 }
