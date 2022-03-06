@@ -6,21 +6,17 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.*
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
-import kotlinx.coroutines.launch
-import kyalo.innocent.offlinenotes.ui.add_note.AddNoteFragment
-import kyalo.innocent.offlinenotes.ui.add_note.AddNoteFragmentDirections
-import kyalo.innocent.offlinenotes.utils.success
-import kyalo.innocent.roomdb.db.Note
-import kyalo.innocent.roomdb.db.getAllNotesDatabase
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var drawerLayout: DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
+        drawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
 
         val navHostFragment = supportFragmentManager
@@ -57,8 +53,13 @@ class MainActivity : AppCompatActivity() {
         //return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
-    override fun onOptionsItemSelected(menuItem : MenuItem) : Boolean {
-        if (menuItem.getItemId() == android.R.id.home) {
+    /*override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        drawerLayout.
+    }*/
+
+    override fun onOptionsItemSelected(menuItem: MenuItem): Boolean {
+        if (menuItem.itemId == android.R.id.home) {
             onBackPressedDispatcher.onBackPressed()
             return true // must return true to consume it here
 
